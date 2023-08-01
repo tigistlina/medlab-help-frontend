@@ -4,79 +4,75 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Panel from './components/Panel'
 import LabTest from './components/LabTest'
+import PanelList from './components/PanelList';
+
+const kBaseURLPanels = 'http://127.0.0.1:5000/panels';
+const kBaseURLTests = 'http://127.0.0.1:5000/tests';
+
+const getAllPanels = () => {
+  return axios
+    .get<Panel[]>(kBaseURLPanels)
+    .then((res) => {
+      return res.data.map(convertPanelFromAPI)
+    })
+    .catch((err) => 
+    console.log(err));
+};
+
+const convertPanelFromAPI = (apiPanel) => {
+  const { id, name, organ_id } = apiPanel;
+  const newPanel = { id, name, organID: organ_id };
+  return newPanel;
+};
+
+const convertTestFromAPI = (apiTest) => {
+  const { id, panel_id, name, description, info_url, normal_reference, unit_of_measure } = apiTest;
+  const newTest = { id, panelID: panel_id, name, description, infoURL: info_url, normalReference: normal_reference, unitOfMeasure: unit_of_measure };
+  return newTest;
+};
+
+const convertAltNameFromAPI = (apiAltName) => {
+  const { id, test_id, name } = apiAltName;
+  const newAltName = { id, testID: test_id, name };
+  return newAltName;
+};
+
 
 function App() {
-  const kBaseURLPanels = 'http://127.0.0.1:5000/panels';
-  const kBaseURLTests = 'http://127.0.0.1:5000/tests';
 
   const [panelData, setPanelData] = useState<Panel[]>([]);
   const [labTestData, setLabTestData] = useState<LabTest[]>([]);
 
 
-  const getPanels = () => {
-    axios
-      .get<Panel[]>(kBaseURLPanels)
-      .then((res) => {
-        setPanelData(res.data);
-      })
-      .catch((err) => console.log(err));
-  };
   useEffect(() => {
     getPanels();
   }, []);
+
+  // const onPanelSelect = (id) => {
+  //   return axios
+  //   .get(`${kBaseURLPanels}/${id}/tests`)
+  //   .then((res) => {
+  //     setPanelData(res.data.panel)
+
+  //   })
+  // }
+
+  const getPanels = () => {
+    getAllPanels()
+    .then((panels) => {
+      console.log(panels);
+      setPanelData(panels);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  };
+
+
   return (
-    <div className="container">
-      <div className="row">
-        <div className="col-md-6">
-          {/* Display panelData here using Bootstrap components */}
-          <div className="dropdown">
-            <button
-              className="btn btn-primary dropdown-toggle"
-              type="button"
-              id="panelDropdown"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              Select a Panel
-            </button>
-            <div className="dropdown-menu" aria-labelledby="panelDropdown">
-              {/* Render the dropdown items */}
-              {panelData.map((panel) => (
-                <button className="dropdown-item" key={panel.id} type="button">
-                  {/* Display panel name or other properties as needed */}
-                  {panel.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6">
-          {/* Display testData here using Bootstrap components */}
-          <div className="dropdown">
-            <button
-              className="btn btn-primary dropdown-toggle"
-              type="button"
-              id="testDropdown"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              Select a Test
-            </button>
-            <div className="dropdown-menu" aria-labelledby="testDropdown">
-              {/* Render the dropdown items */}
-              {labTestData.map((labtest) => (
-                <button className="dropdown-item" key={labtest.id} type="button">
-                  {/* Display test name or other properties as needed */}
-                  {labtest.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div>
+      <PanelList panelData={panelData} />
+  </div>
   );
 }
 export default App;
