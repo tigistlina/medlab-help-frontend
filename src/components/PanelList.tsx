@@ -2,7 +2,14 @@ import React from "react";
 import PropTypes from 'prop-types';
 import Panel from './Panel';
 
-const PanelList = (props) => {
+interface PanelListProps {
+    id: number,
+    name: string,
+    organID: number,
+    panelData: {},
+}
+
+const PanelList = (props: PanelListProps) => {
     const getPanelList = (panels) => {
         return panels.map((panel) => {
             return (

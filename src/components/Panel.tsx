@@ -1,14 +1,13 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-interface Panel {
-    id: number,
-    name: string,
-};
-
-const state = reactive<Panel>({
-    id: ,
-    name: ''
-
-});
+const Panel = (props) => {
+    return (
+        <ul>
+            <li>{props.name}</li>
+        </ul>
+       
+    )
+}
 
 export default Panel;

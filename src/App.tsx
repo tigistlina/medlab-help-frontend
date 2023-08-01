@@ -61,7 +61,7 @@ function App() {
     getAllPanels()
     .then((panels) => {
       console.log(panels);
-      setPanelData(panels);
+      // setPanelData(panels);
     })
     .catch((err) => {
       console.log(err);
