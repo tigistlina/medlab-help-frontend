@@ -2,21 +2,26 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import Panel from './components/Panel'
-import LabTest from './components/LabTest'
-import PanelList from './components/PanelList';
+import PanelList, { PanelData } from './components/PanelList';
 
-const kBaseURLPanels = 'http://127.0.0.1:5000/panels';
-const kBaseURLTests = 'http://127.0.0.1:5000/tests';
+const kBaseURLPanels = 'http://127.0.0.1:8000/panels/';
 
 const getAllPanels = () => {
   return axios
-    .get<Panel[]>(kBaseURLPanels)
+    .get<PanelData[]>(kBaseURLPanels)
     .then((res) => {
-      return res.data.map(convertPanelFromAPI)
+      console.log(res)
+      const panelsArray = res.data;
+      const convertedPanels = panelsArray.map(convertPanelFromAPI);
+
+      return convertedPanels
+
+      // return res.data.panels.map(convertPanelFromAPI)
     })
-    .catch((err) => 
-    console.log(err));
+    .catch((err) => {
+      console.log("Error fetching panels:", err);
+      return [];
+    });
 };
 
 const convertPanelFromAPI = (apiPanel) => {
@@ -25,54 +30,23 @@ const convertPanelFromAPI = (apiPanel) => {
   return newPanel;
 };
 
-const convertTestFromAPI = (apiTest) => {
-  const { id, panel_id, name, description, info_url, normal_reference, unit_of_measure } = apiTest;
-  const newTest = { id, panelID: panel_id, name, description, infoURL: info_url, normalReference: normal_reference, unitOfMeasure: unit_of_measure };
-  return newTest;
-};
-
-const convertAltNameFromAPI = (apiAltName) => {
-  const { id, test_id, name } = apiAltName;
-  const newAltName = { id, testID: test_id, name };
-  return newAltName;
-};
-
-
-function App() {
-
-  const [panelData, setPanelData] = useState<Panel[]>([]);
-  const [labTestData, setLabTestData] = useState<LabTest[]>([]);
-
+const App: React.FC = () => {
+  const [panelData, setPanelData] = useState<PanelData[]>([]);
 
   useEffect(() => {
-    getPanels();
+    getAllPanels().then((panels) => {
+      console.log("Fetched panels:", panels);
+      setPanelData(panels);
+    });
   }, []);
 
-  // const onPanelSelect = (id) => {
-  //   return axios
-  //   .get(`${kBaseURLPanels}/${id}/tests`)
-  //   .then((res) => {
-  //     setPanelData(res.data.panel)
-
-  //   })
-  // }
-
-  const getPanels = () => {
-    getAllPanels()
-    .then((panels) => {
-      console.log(panels);
-      // setPanelData(panels);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  };
-
+  console.log("panelData in App:", panelData);
 
   return (
     <div>
       <PanelList panelData={panelData} />
-  </div>
+    </div>
   );
 }
+
 export default App;
