@@ -11,12 +11,7 @@ const getAllPanels = () => {
     .get<PanelData[]>(kBaseURLPanels)
     .then((res) => {
       console.log(res)
-      const panelsArray = res.data;
-      const convertedPanels = panelsArray.map(convertPanelFromAPI);
-
-      return convertedPanels
-
-      // return res.data.panels.map(convertPanelFromAPI)
+      return res.data.panels.map(convertPanelFromAPI)
     })
     .catch((err) => {
       console.log("Error fetching panels:", err);
