@@ -3,14 +3,18 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import PanelList, { PanelData } from './components/PanelList';
+import OrganList, { OrganData } from './components/OrganList';
+
 
 const kBaseURLPanels = 'http://127.0.0.1:8000/panels/';
+const kBaseURLOrgans = 'http://127.0.0.1:8000/organs/';
+
 
 const getAllPanels = () => {
   return axios
-    .get<PanelData[]>(kBaseURLPanels)
+    .get<{panels:PanelData[]}>(kBaseURLPanels)
     .then((res) => {
-      console.log(res)
+      console.log(res);
       return res.data.panels.map(convertPanelFromAPI)
     })
     .catch((err) => {
@@ -19,28 +23,65 @@ const getAllPanels = () => {
     });
 };
 
-const convertPanelFromAPI = (apiPanel) => {
-  const { id, name, organ_id } = apiPanel;
-  const newPanel = { id, name, organID: organ_id };
-  return newPanel;
+const convertPanelFromAPI = (panel: PanelData): { id: number; name: string; organID: number } => {
+  return {
+    id: panel.id,
+    name: panel.name,
+    organID: panel.organID,
+  };
+};
+
+const getAllOrgans = () => {
+  return axios
+    .get<{organs:OrganData[]}>(kBaseURLOrgans)
+    .then((res) => {
+      console.log(res);
+      return res.data.organs
+    })
+    .catch((err) => {
+      console.log("Error fetching organs:", err);
+      return [];
+    });
 };
 
 const App: React.FC = () => {
   const [panelData, setPanelData] = useState<PanelData[]>([]);
+  const [organData, setOrganData] = useState<OrganData[]>([]);
+  const [selectedPanel, setSelectedPanel] = useState<PanelData[]>([]);
+
 
   useEffect(() => {
     getAllPanels().then((panels) => {
       console.log("Fetched panels:", panels);
       setPanelData(panels);
-    });
+
+    getAllOrgans().then((organs) => {
+      console.log("Fetched organs:", organs);
+      setOrganData(organs);
+    }
+  )});
   }, []);
 
   console.log("panelData in App:", panelData);
 
+  const findPanelById = (panelID: number) => {
+    return panelData.filter((panel) => {return panel.id === panelID})
+  };
+
+  const handlePanelSecltion = (panelID: number) => {
+    const panel = findPanelById(panelID);
+    setSelectedPanel(panel);
+  };
+
   return (
-    <div>
-      <PanelList panelData={panelData} />
-    </div>
+    <section>
+      <div>
+        <PanelList panelData={panelData} />
+      </div>
+      <div>
+        <OrganList organData={organData} />
+      </div>
+    </section>
   );
 }
 
