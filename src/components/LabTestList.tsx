@@ -19,7 +19,7 @@ interface LabTestListProps {
 
     const LabTestList: React.FC<LabTestListProps> = ({ testList, onTestClick, selectedTest }) => {
     if (!testList || testList.length === 0) {
-        return <div>No tests available for this panel.</div>;
+        return null;
     }
 
     return (
