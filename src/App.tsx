@@ -6,15 +6,16 @@ import PanelList, { PanelData } from './components/PanelList';
 import OrganList, { OrganData } from './components/OrganList';
 import LabTestList, { labTestData } from './components/LabTestList';
 
-const kBaseURLPanels = 'http://127.0.0.1:8000/panels/';
-const kBaseURLOrgans = 'http://127.0.0.1:8000/organs/';
-const kBaseURLTests = 'http://127.0.0.1:8000/tests/';
+const kBaseURL = 'http://127.0.0.1:8000';
 
 const App: React.FC = () => {
   const [panelData, setPanelData] = useState<PanelData[]>([]);
   const [organData, setOrganData] = useState<OrganData[]>([]);
   const [selectedPanel, setSelectedPanel] = useState<PanelData | null>(null);
   const [labTestData, setlabTestData] = useState<labTestData[]>([])
+  const [selectedTest, setSelectedTest] = useState<labTestData | null>(null);
+  const [selectedOrgan, setSelectedOrgan] = useState<OrganData | null>(null);
+  const [relatedTests, setRelatedTests] = useState<labTestData[]>([]);
 
   useEffect(() => {
     getAllPanels().then((panels) => {
@@ -36,7 +37,7 @@ const App: React.FC = () => {
 
   const getAllPanels = () => {
     return axios
-      .get<{ panels: PanelData[] }>(kBaseURLPanels)
+      .get<{ panels: PanelData[] }>(`${kBaseURL}/panels/`)
       .then((res) => {
         console.log(res);
         return res.data.panels;
@@ -49,7 +50,7 @@ const App: React.FC = () => {
 
   const getAllTests = () => {
     return axios
-      .get<{tests: labTestData[] }>(kBaseURLTests)
+      .get<{tests: labTestData[] }>(`${kBaseURL}/tests/`)
       .then((res) => {
         console.log(res);
         return res.data.tests;
@@ -62,7 +63,7 @@ const App: React.FC = () => {
 
   const getAllOrgans = () => {
     return axios
-      .get<{ organs: OrganData[] }>(kBaseURLOrgans)
+      .get<{ organs: OrganData[] }>(`${kBaseURL}/organs/`)
       .then((res) => {
         console.log(res);
         return res.data.organs;
@@ -81,6 +82,26 @@ const App: React.FC = () => {
 
   const filterTest = labTestData.filter((test) => test.panel_id === selectedPanel?.id);
 
+  const handleTestClick = (test: labTestData) => {
+    setSelectedTest(test);
+  };
+
+  const handleOrganClick = (organ: OrganData) => {
+    setSelectedOrgan(organ);
+
+    axios
+    .get<labTestData[] >(`${kBaseURL}/organs/${organ.id}/tests/`)
+    .then((res) => {
+      console.log('tests related to organ:', res);
+      setRelatedTests(res.data);
+    })
+    .catch((err) => {
+      console.log('Error fetching related tests:', err);
+      setRelatedTests([]);
+    });
+};
+
+
   return (
     <section>
       <div>
@@ -88,14 +109,18 @@ const App: React.FC = () => {
 
       </div>
       <div>
-        <OrganList organData={organData} />
+        <OrganList organData={organData} onOrganClick={handleOrganClick}/>
       </div>
       <div>
-        {selectedPanel && (
-          <>
-            <h2>Tests for: {selectedPanel.name}</h2>
+          <h2>Tests for: {selectedPanel !== null ? selectedPanel.name : ''}</h2>
 
-            <LabTestList testList={filterTest} />
+          <LabTestList testList={filterTest} onTestClick={handleTestClick} selectedTest={selectedTest} />
+      </div>
+      <div>
+        {selectedOrgan && (
+          <>
+            <h2>Tests related to: {selectedOrgan.name}</h2>
+            <LabTestList testList={relatedTests} onTestClick={() => {}} selectedTest={selectedTest} />
           </>
         )}
       </div>

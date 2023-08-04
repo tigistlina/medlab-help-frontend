@@ -8,26 +8,26 @@ export interface OrganData {
 
 interface OrganListProps {
     organData: OrganData[];
+    onOrganClick: (organ: OrganData) => void;
 }
 
-const OrganList: React.FC<OrganListProps> = (props) => {
-    const { organData } = props;
-
+const OrganList: React.FC<OrganListProps> = ({ organData, onOrganClick }) => {
     if (organData.length === 0) {
         return <div>No data available.</div>;
     }
 
     return (
         <section>
-        <ul>
-            {organData.map((organ) => (
-            <Organ
-                id={organ.id}
-                name={organ.name}
-                key={organ.id}
-            />
-            ))}
-        </ul>
+            <ul>
+                {organData.map((organ) => (
+                    <Organ
+                        key={organ.id}
+                        id={organ.id}
+                        name={organ.name}
+                        onClick={() => onOrganClick(organ)}
+                    />
+                ))}
+            </ul>
         </section>
     );
 };
